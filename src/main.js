@@ -24,19 +24,22 @@ let is_tracking = false;
 /** @type EventCoords[] */
 let last_three_events;
 
-/** @type (e: MouseEvent) => void */
+/** @type (e: EventCoords) => void */
 const start_tracking = (event) => {
   last_three_events = [{ x: event.x, y: event.y }];
   is_tracking = true;
   draw_point(event.x, event.y, LINE_WIDTH);
 };
 
+/** @type (e: EventCoords) => void */
 const track = (event) => {
+  console.log("test");
   if (is_tracking) {
     draw_point(event.x, event.y, LINE_WIDTH);
   }
 };
 
+/** @type (e: EventCoords) => void */
 const stop_tracking = (_event) => {
   is_tracking = false;
 };
@@ -65,7 +68,7 @@ const draw_point = (x, y, width) => {
   );
 };
 
-canvas.onmousedown = start_tracking;
-canvas.onmouseup = stop_tracking;
-canvas.onmousemove = track;
-canvas.onmouseout = stop_tracking;
+canvas.addEventListener("pointerrawupdate", track);
+canvas.addEventListener("pointerdown", start_tracking);
+canvas.addEventListener("pointerup", stop_tracking);
+canvas.addEventListener("pointerout", stop_tracking);

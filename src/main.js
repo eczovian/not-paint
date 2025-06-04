@@ -36,27 +36,13 @@ const track = (event) => {
       last_four_points.unshift(event);
       return;
     } else {
-      for (let t = 0; t < 1; t = t + 0.03) {
-        draw_point(
-          {
-            x: calculate_bezier_x(
-              last_four_points[0],
-              last_four_points[1],
-              last_four_points[2],
-              last_four_points[3],
-              t,
-            ),
-            y: calculate_bezier_y(
-              last_four_points[0],
-              last_four_points[1],
-              last_four_points[2],
-              last_four_points[3],
-              t,
-            ),
-          },
-          LINE_WIDTH,
-        );
-      }
+      calculate_bezier_de_cateljau(
+        last_four_points[0],
+        last_four_points[1],
+        last_four_points[2],
+        last_four_points[3],
+        5,
+      );
       last_four_points.pop();
     }
   }
@@ -102,22 +88,56 @@ const draw_point = (point, width) => {
 };
 
 /** @type (P1:vec2, P2:vec2, P3:vec2, P4:vec2, t:number)=> number */
-const calculate_bezier_y = (P1, P2, P3, P4, t) => {
+const calculate_bezier_y = (p1, p2, p3, p4, t) => {
   return (
-    (1 - t) ** 3 * P1.y +
-    3 * (1 - t) ** 2 * t * P2.y +
-    3 * (1 - t) * t ** 2 * P3.y +
-    t ** 3 * P4.y
+    (1 - t) ** 3 * p1.y +
+    3 * (1 - t) ** 2 * t * p2.y +
+    3 * (1 - t) * t ** 2 * p3.y +
+    t ** 3 * p4.y
   );
 };
 
-const calculate_bezier_x = (P1, P2, P3, P4, t) => {
+const calculate_bezier_x = (p1, p2, p3, p4, t) => {
   return (
-    (1 - t) ** 3 * P1.x +
-    3 * (1 - t) ** 2 * t * P2.x +
-    3 * (1 - t) * t ** 2 * P3.x +
-    t ** 3 * P4.x
+    (1 - t) ** 3 * p1.x +
+    3 * (1 - t) ** 2 * t * p2.x +
+    3 * (1 - t) * t ** 2 * p3.x +
+    t ** 3 * p4.x
   );
+};
+
+/** @type (P1:vec2, P2:vec2, P3:vec2, P4:vec2)=> number */
+const calculate_bezier_de_cateljau = (p1, p2, p3, p4, i) => {
+  const x12 = (p1.x + p2.x) / 2;
+  const y12 = (p1.y + p2.y) / 2;
+  const x23 = (p2.x + p3.x) / 2;
+  const y23 = (p2.y + p3.y) / 2;
+  const x34 = (p3.x + p4.x) / 2;
+  const y34 = (p3.y + p4.y) / 2;
+  const x123 = (x12 + x23) / 2;
+  const y123 = (y12 + y23) / 2;
+  const x234 = (x23 + x34) / 2;
+  const y234 = (y23 + y34) / 2;
+  const x1234 = (x123 + x234) / 2;
+  const y1234 = (y123 + y234) / 2;
+  if (i == 0) {
+    draw_point({ x: x1234, y: y1234 }, LINE_WIDTH);
+  } else {
+    calculate_bezier_de_cateljau(
+      { x: p1.x, y: p1.y },
+      { x: x12, y: y12 },
+      { x: x123, y: y123 },
+      { x: x1234, y: y1234 },
+      i - 1,
+    );
+    calculate_bezier_de_cateljau(
+      { x: x1234, y: y1234 },
+      { x: x234, y: y234 },
+      { x: x34, y: y34 },
+      { x: p4.x, y: p4.y },
+      i - 1,
+    );
+  }
 };
 
 /** @type (a:vec2,b:vec2)=> vec2
@@ -134,7 +154,7 @@ const vec2_add = (a, b) => {
   return { x: a.x + b.x, y: a.y + b.y };
 };
 
-canvas.addEventListener("pointerrawupdate", track);
+canvas.addEventListener("pointermove", track);
 canvas.addEventListener("pointerdown", start_tracking);
 canvas.addEventListener("pointerup", stop_tracking);
 canvas.addEventListener("pointerout", stop_tracking);

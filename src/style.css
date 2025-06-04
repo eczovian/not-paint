@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+#drawing-board {
+  touch-action:none;
+}

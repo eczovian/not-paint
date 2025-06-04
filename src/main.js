@@ -29,22 +29,23 @@ const start_tracking = (event) => {
   draw_point(event, LINE_WIDTH);
 };
 
-/** @type (event:vec2)=> void */
+/** @type (event:PointerEvent)=> void */
 const track = (event) => {
   if (is_tracking) {
-    if (last_four_points.length < 4) {
-      last_four_points.unshift(event);
-      return;
-    } else {
-      calculate_bezier_de_cateljau(
-        last_four_points[0],
-        last_four_points[1],
-        last_four_points[2],
-        last_four_points[3],
-        5,
-      );
-      last_four_points.pop();
-    }
+    for (let e of event.getCoalescedEvents())
+      if (last_four_points.length < 4) {
+        last_four_points.unshift(e);
+        continue;
+      } else {
+        calculate_bezier_de_cateljau(
+          last_four_points[0],
+          last_four_points[1],
+          last_four_points[2],
+          last_four_points[3],
+          5,
+        );
+        last_four_points.pop();
+      }
   }
 };
 

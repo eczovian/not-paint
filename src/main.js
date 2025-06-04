@@ -15,36 +15,66 @@ const log_thing = (identifier) => {
   };
 };
 
-/** @typedef {Object} EventCoords
+/** @typedef {Object} vec2
  * @property {number} x
  * @property {number} y
  */
 
 let is_tracking = false;
-/** @type EventCoords[] */
-let last_three_events;
+/** @type vec2[] */
+let last_four_points = [];
 
-/** @type (e: EventCoords) => void */
 const start_tracking = (event) => {
-  last_three_events = [{ x: event.x, y: event.y }];
   is_tracking = true;
-  draw_point(event.x, event.y, LINE_WIDTH);
+  draw_point(event, LINE_WIDTH);
 };
 
-/** @type (e: EventCoords) => void */
+/** @type (event:vec2)=> void */
 const track = (event) => {
-  console.log("test");
   if (is_tracking) {
-    draw_point(event.x, event.y, LINE_WIDTH);
+    if (last_four_points.length < 4) {
+      last_four_points.unshift(event);
+      return;
+    } else {
+      for (let t = 0; t < 1; t = t + 0.03) {
+        draw_point(
+          {
+            x: calculate_bezier_x(
+              last_four_points[0],
+              last_four_points[1],
+              last_four_points[2],
+              last_four_points[3],
+              t,
+            ),
+            y: calculate_bezier_y(
+              last_four_points[0],
+              last_four_points[1],
+              last_four_points[2],
+              last_four_points[3],
+              t,
+            ),
+          },
+          LINE_WIDTH,
+        );
+      }
+      last_four_points.pop();
+    }
   }
 };
 
-/** @type (e: EventCoords) => void */
-const stop_tracking = (_event) => {
-  is_tracking = false;
+/** @type (a:vec2, b:vec2) => number */
+const distBetween = (a, b) => {
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 };
 
-const draw_point = (x, y, width) => {
+const stop_tracking = (_event) => {
+  is_tracking = false;
+  last_four_points = [];
+};
+
+const draw_point = (point, width) => {
+  const x = Math.round(point.x);
+  const y = Math.round(point.y);
   const data = ctx.getImageData(
     x - Math.floor(0.5 * width),
     y - Math.floor(0.5 * width),
@@ -54,7 +84,10 @@ const draw_point = (x, y, width) => {
   for (let i = 0; i < data.data.length; i = i + 4) {
     const relativeY = Math.floor(i / 4 / width) + (y - 0.5 * width);
     const relativeX = ((i / 4) % width) + (x - 0.5 * width);
-    if (Math.sqrt((relativeX - x) ** 2 + (relativeY - y) ** 2) < width * 0.5) {
+    if (
+      distBetween({ x: x, y: y }, { x: relativeX, y: relativeY }) <
+      width * 0.5
+    ) {
       data.data[i] = 0;
       data.data[i + 1] = 0;
       data.data[i + 2] = 0;
@@ -66,6 +99,39 @@ const draw_point = (x, y, width) => {
     x - Math.floor(0.5 * width),
     y - Math.floor(0.5 * width),
   );
+};
+
+/** @type (P1:vec2, P2:vec2, P3:vec2, P4:vec2, t:number)=> number */
+const calculate_bezier_y = (P1, P2, P3, P4, t) => {
+  return (
+    (1 - t) ** 3 * P1.y +
+    3 * (1 - t) ** 2 * t * P2.y +
+    3 * (1 - t) * t ** 2 * P3.y +
+    t ** 3 * P4.y
+  );
+};
+
+const calculate_bezier_x = (P1, P2, P3, P4, t) => {
+  return (
+    (1 - t) ** 3 * P1.x +
+    3 * (1 - t) ** 2 * t * P2.x +
+    3 * (1 - t) * t ** 2 * P3.x +
+    t ** 3 * P4.x
+  );
+};
+
+/** @type (a:vec2,b:vec2)=> vec2
+ * @return the vector resulting from a - b
+ */
+const vec2_subtract = (a, b) => {
+  return { x: a.x - b.x, y: a.y - b.y };
+};
+
+/** @type (a:vec2,b:vec2)=> vec2
+ * @description returns the vector resulting from a + b
+ */
+const vec2_add = (a, b) => {
+  return { x: a.x + b.x, y: a.y + b.y };
 };
 
 canvas.addEventListener("pointerrawupdate", track);

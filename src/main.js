@@ -1,3 +1,39 @@
+import Alpine from "alpinejs";
+
+window.Alpine = Alpine;
+
+/** @typedef {Object} tool
+ * @propery {number} r
+ * @propery {number} g
+ * @propery {number} b
+ * @propery {number} a
+ * @propery {number} width
+ */
+
+/** @type tool */
+const brush = { r: 0, g: 0, b: 0, a: 255, width: 10 };
+/** @type tool */
+const eraser = { r: 255, g: 255, b: 255, a: 255, width: 25 };
+
+Alpine.store("selected_tool", {
+  tool_name: "brush",
+
+  /** @type 'brush'|'eraser' => void */
+  set_tool(tool) {
+    this.tool_name = tool;
+  },
+
+  get_tool_for_tool_name(tool_name) {
+    return { brush: brush, eraser: eraser }[tool_name];
+  },
+
+  get_current_tool() {
+    return this.get_tool_for_tool_name(this.tool_name);
+  },
+});
+
+Alpine.start();
+
 /** @type HTMLCanvasElement */
 const canvas = document.getElementById("drawing-board");
 const wrapper_div = document.getElementById("wrapper-div");
@@ -5,15 +41,6 @@ canvas.width = wrapper_div.clientWidth;
 canvas.height = wrapper_div.clientHeight;
 
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
-ctx.lineWidth = 10;
-ctx.strokeStyle = "#000";
-const LINE_WIDTH = 10;
-
-const log_thing = (identifier) => {
-  return (event) => {
-    console.log(identifier, event);
-  };
-};
 
 /** @typedef {Object} vec2
  * @property {number} x
@@ -26,7 +53,7 @@ let last_four_points = [];
 
 const start_tracking = (event) => {
   is_tracking = true;
-  draw_point(event, LINE_WIDTH);
+  draw_point(event);
 };
 
 /** @type (event:PointerEvent)=> void */
@@ -50,7 +77,7 @@ const track = (event) => {
 };
 
 /** @type (a:vec2, b:vec2) => number */
-const distBetween = (a, b) => {
+const dist_between = (a, b) => {
   return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 };
 
@@ -59,7 +86,11 @@ const stop_tracking = (_event) => {
   last_four_points = [];
 };
 
-const draw_point = (point, width) => {
+/** @type (point:vec2, )=> void */
+const draw_point = (point) => {
+  /** @type tool */
+  const tool = Alpine.store("selected_tool").get_current_tool();
+  const width = tool.width;
   const x = Math.round(point.x);
   const y = Math.round(point.y);
   const data = ctx.getImageData(
@@ -72,13 +103,13 @@ const draw_point = (point, width) => {
     const relativeY = Math.floor(i / 4 / width) + (y - 0.5 * width);
     const relativeX = ((i / 4) % width) + (x - 0.5 * width);
     if (
-      distBetween({ x: x, y: y }, { x: relativeX, y: relativeY }) <
+      dist_between({ x: x, y: y }, { x: relativeX, y: relativeY }) <
       width * 0.5
     ) {
-      data.data[i] = 0;
-      data.data[i + 1] = 0;
-      data.data[i + 2] = 0;
-      data.data[i + 3] = 255;
+      data.data[i] = tool.r;
+      data.data[i + 1] = tool.g;
+      data.data[i + 2] = tool.b;
+      data.data[i + 3] = tool.a;
     }
   }
   ctx.putImageData(
@@ -122,7 +153,7 @@ const calculate_bezier_de_cateljau = (p1, p2, p3, p4, i) => {
   const x1234 = (x123 + x234) / 2;
   const y1234 = (y123 + y234) / 2;
   if (i == 0) {
-    draw_point({ x: x1234, y: y1234 }, LINE_WIDTH);
+    draw_point({ x: x1234, y: y1234 });
   } else {
     calculate_bezier_de_cateljau(
       { x: p1.x, y: p1.y },

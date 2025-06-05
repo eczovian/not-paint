@@ -3,3 +3,7 @@
 #drawing-board {
   touch-action:none;
 }
+
+.bg-black {
+  background-color: var(--color-gray-600);
+}

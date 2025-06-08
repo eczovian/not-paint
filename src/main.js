@@ -38,6 +38,22 @@ Alpine.magic("rgb", () => {
   return `#${brush.r < 16 ? "0" + brush.r.toString(16) : brush.r.toString(16)}${brush.g < 16 ? "0" + brush.g.toString(16) : brush.g.toString(16)}${brush.b < 16 ? "0" + brush.b.toString(16) : brush.b.toString(16)}`;
 });
 
+Alpine.magic("brush_width", () => {
+  return brush.width;
+});
+
+Alpine.magic("set_brush_width", () => {
+  return (width) => (brush.width = Number.parseInt(width));
+});
+
+Alpine.magic("eraser_width", () => {
+  return eraser.width;
+});
+
+Alpine.magic("set_eraser_width", () => {
+  return (width) => (eraser.width = Number.parseInt(width));
+});
+
 Alpine.start();
 
 /** @type HTMLCanvasElement */

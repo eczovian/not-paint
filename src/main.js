@@ -320,3 +320,18 @@ const calc_rgb = (rgb) => {
 };
 
 window.calc_rgb = calc_rgb;
+
+Alpine.magic("paste", async () => {
+  try {
+    const items = (await navigator.clipboard.read(["image/png"])).at(0);
+    const content = await items.getType("image/png");
+    const image = await window.createImageBitmap(content);
+    ctx.drawImage(
+      image,
+      (canvas.width - image.width) / 2,
+      (canvas.height - image.height) / 2,
+    );
+  } catch {}
+});
+
+Alpine.start();

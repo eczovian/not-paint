@@ -12,7 +12,7 @@
 <body>
   <div id="app"></div>
   <script type="module" src="/src/main.js"></script>
-  <div id="control-panel" class="flex absolute ml-[50%] translate-x-[-50%] gap-3">
+  <div id="control-panel" class="flex absolute left-[50%] translate-x-[-50%] gap-3">
     <button x-data @click="$store.selected_tool.set_tool('brush')"
       :class="$store.selected_tool.tool_name=='brush' && 'bg-black'"
       class="p-2 border-2 rounded-md hover:bg-gray-400">Brush</button>
@@ -20,6 +20,12 @@
       :class="$store.selected_tool.tool_name=='eraser' && 'bg-black'"
       class="p-2 border-2 rounded-md hover:bg-gray-400">Eraser</button>
   </div>
+  <template x-data x-if="$store.selected_tool.tool_name=='eraser'">
+    <div id="control-control-panel" class="flex absolute left-0 top-[50%] translate-y-[-50%]">
+      <input type="checkbox" @change="$store.erase_type = $store.erase_type == 'line' ? 'point' : 'line'"
+        :checked="$store.erase_type=='line'">Linie</input>
+    </div>
+  </template>
   <div id="wrapper-div" style="width: 100vw;height: 100vh;">
     <canvas class="w-full h-full" id="drawing-board"></canvas>
   </div>

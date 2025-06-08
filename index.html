@@ -26,6 +26,11 @@
         :checked="$store.erase_type=='line'">Linie</input>
     </div>
   </template>
+  <template x-data x-if="$store.selected_tool.tool_name=='brush'">
+    <div id="control-control-panel" class="flex absolute left-0 top-[50%] translate-y-[-50%]">
+      <input type="color" @change="calc_rgb($el.value);console.log($rgb)" :value="$rgb" />
+    </div>
+  </template>
   <div id="wrapper-div" style="width: 100vw;height: 100vh;">
     <canvas class="w-full h-full" id="drawing-board"></canvas>
   </div>

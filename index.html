@@ -6,11 +6,11 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <link rel="stylesheet" href="src/style.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vite App</title>
+  <title>not-paint</title>
 </head>
 
 <body>
-  <div id="app"></div>
+  <div x-data id="app" @keydown.ctrl.v.window.prevent="$paste"></div>
   <script type="module" src="/src/main.js"></script>
   <div id="control-panel" class="flex absolute left-[50%] translate-x-[-50%] gap-3">
     <button x-data @click="$store.selected_tool.set_tool('brush')"

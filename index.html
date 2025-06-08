@@ -20,15 +20,27 @@
       :class="$store.selected_tool.tool_name=='eraser' && 'bg-black'"
       class="p-2 border-2 rounded-md hover:bg-gray-400">Eraser</button>
   </div>
-  <template x-data x-if="$store.selected_tool.tool_name=='eraser'">
-    <div id="control-control-panel" class="flex absolute left-0 top-[50%] translate-y-[-50%]">
-      <input type="checkbox" @change="$store.erase_type = $store.erase_type == 'line' ? 'point' : 'line'"
-        :checked="$store.erase_type=='line'">Linie</input>
+  <template x-data x-if="$store.selected_tool.tool_name=='brush'">
+    <div id="control-control-panel" class="flex-col flex absolute left-0 top-[50%] translate-y-[-50%]">
+      <div>
+        <input type="color" @change="calc_rgb($el.value)" :value="$rgb" />
+      </div>
+      <div>
+        <input type="range" min="2" max="50" step="2" @change="$set_brush_width($el.value)"
+          :value="$brush_width">Thickness</input>
+      </div>
     </div>
   </template>
-  <template x-data x-if="$store.selected_tool.tool_name=='brush'">
-    <div id="control-control-panel" class="flex absolute left-0 top-[50%] translate-y-[-50%]">
-      <input type="color" @change="calc_rgb($el.value);console.log($rgb)" :value="$rgb" />
+  <template x-data x-if="$store.selected_tool.tool_name=='eraser'">
+    <div id="control-control-panel" class="flex flex-col absolute left-0 top-[50%] translate-y-[-50%]">
+      <div>
+        <input type="checkbox" @change="$store.erase_type = $store.erase_type == 'line' ? 'point' : 'line'"
+          :checked="$store.erase_type=='line'">Linie</input>
+      </div>
+      <div>
+        <input type="range" min="2" max="50" step="2" @change="$set_eraser_width($el.value)"
+          :value="$eraser_width">Thickness</input>
+      </div>
     </div>
   </template>
   <div id="wrapper-div" style="width: 100vw;height: 100vh;">
